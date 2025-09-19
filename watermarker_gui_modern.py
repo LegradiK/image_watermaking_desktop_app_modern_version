@@ -232,13 +232,14 @@ class Watermarker_App(ctk.CTk):
 
     # Upload pic
     def upload_pic(self):
+        """ Upload a picture from system"""
         fileTypes = [("Image Files", "*.jpg *.jpeg *.png")]
         path = tk.filedialog.askopenfilename(filetypes=fileTypes)
         if len(path):
             self.image_path = path
             self.img = Image.open(path)
-            img_w, img_h = self.img.size
-            if img_w > pic_frame_w and img_h> pic_frame_h:
+            self.img_w, self.img_h = self.img.size
+            if self.img_w > pic_frame_w and self.img_h> pic_frame_h:
                 self.img.thumbnail((pic_frame_w-20, pic_frame_h-20), Image.LANCZOS)
             pic = ImageTk.PhotoImage(self.img)
 
@@ -250,6 +251,58 @@ class Watermarker_App(ctk.CTk):
             self.pic_canvas.image = pic
         else:
             print('No file is selected')
+
+    def waterMarker(self):
+        """ getting all the input about how a user wants to watermark a pic"""
+        if not self.image_path:
+            messagebox.showwarning('No image','Please upload an image')
+            return
+        self.text = self.textEntry_var.get()
+        self.font_size = self.font_size_var.get()
+        self.font_style = self.font_var.get()
+        self.font_color = self.font_color_var.get()
+        self.font_transparency = self.font_transparency_slider_var.get()
+
+        if not self.text:
+            messagebox.showwarning('No text','Please type watermarking text')
+            return
+        try:
+            self.font_size = int(self.font_size_var.get())
+        except ValueError:
+            self.font_size = None
+
+        self.watermarked_pic = self.apply_watermark(
+            self.image_path,
+            self.text,
+            self.font_size,
+            self.font_style,
+            self.font_color,
+            self.font_transparency
+        )
+        display_img = self.watermarked_pic
+        display_img.thumbnail((pic_frame_w, pic_frame_h), Image.LANCZOS)
+
+        tk_img = ImageTk.PhotoImage(display_img)
+        self.pic_canvas.delete('all')
+        self.pic_canvas.create_image(600, 395, image=tk_img, anchor='center')
+        self.pic_canvas.image = tk_img
+
+        def apply_watermark(self, image_path, text, font_size, font_style,
+                            font_color, font_transparency):
+            # create another layer where watermark will be on
+            text_layer = Image.new('RGBA', self.img.size, (255, 255, 255, 0))
+            # deciding the test_layer and font details
+            draw = ImageDraw.Draw(text_layer)
+
+        if font_size is None:
+            font_size = int(min(im_w, im_h) / 10)
+        else:
+            font_size = int(min(im_w, im_h) * font_size / 100)
+
+        try:
+            font = ImageFont.truetype(f'{font_family}.ttf', font_size)
+        except:
+            font = ImageFont.load_default()
 
     # update font according to the user input
     def update_font(self, value=None):
@@ -276,6 +329,7 @@ class Watermarker_App(ctk.CTk):
             self.update_font()
 
     def update_transparency(self, value):
+        """get a user input for the transparency of text"""
         self.font_transparency_slider_var = int(float(value) * 255 / 100)
 
 
