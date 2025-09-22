@@ -108,7 +108,6 @@ class Watermarker_App(ctk.CTk):
         self.text_frame.grid(row=0, column=1, pady=20, padx=20)
 
         # Entry text box
-        self.textEntry_var = tk.StringVar()
         self.textEntry = tk.Text(
             self.text_frame
         )
@@ -152,7 +151,7 @@ class Watermarker_App(ctk.CTk):
         self.font_size_var = tk.IntVar(value=10)
         self.font_sizeLabel = ctk.CTkLabel(
              self.control_panel_frame,
-             text='Font size: '
+             text='Font size (in %): '
         )
         self.font_sizeLabel.grid(
             row=4,
@@ -190,12 +189,12 @@ class Watermarker_App(ctk.CTk):
             pady=20,
             sticky='ew'
         )
-        self.font_color = tk.Button(
+        self.font_color_button = tk.Button(
             self.control_panel_frame,
             text='Select',
             command = self.update_color
         )
-        self.font_color.grid(
+        self.font_color_button.grid(
             row=5,
             column=1,
             padx=20,
@@ -204,7 +203,7 @@ class Watermarker_App(ctk.CTk):
         )
 
         # apply transparency to font
-        self.font_transparency_slider_var = tk.IntVar(value=100)  # default transparency
+        self.font_transparency_slider_var = 100  # default transparency
         self.font_transparency_sliderLabel = ctk.CTkLabel(
             self.control_panel_frame,
             text='Transparency (0-100%): '
@@ -224,6 +223,19 @@ class Watermarker_App(ctk.CTk):
         )
         self.font_transparency_slider.grid(
             row=6,
+            column=1,
+            padx=5,
+            pady=5,
+            sticky='ew'
+        )
+
+        self.apply_buttonButton = ctk.CTkButton(
+            self.control_panel_frame,
+            text='Apply',
+            command=self.waterMarker
+        )
+        self.apply_buttonButton.grid(
+            row=7,
             column=1,
             padx=5,
             pady=5,
@@ -257,11 +269,11 @@ class Watermarker_App(ctk.CTk):
         if not self.image_path:
             messagebox.showwarning('No image','Please upload an image')
             return
-        self.text = self.textEntry_var.get()
+        self.text = self.textEntry.get("1.0", "end-1c").strip()
         self.font_size = self.font_size_var.get()
         self.font_style = self.font_var.get()
         self.font_color = self.font_color_var.get()
-        self.font_transparency = self.font_transparency_slider_var.get()
+        self.font_transparency = self.font_transparency_slider_var
 
         if not self.text:
             messagebox.showwarning('No text','Please type watermarking text')
@@ -272,7 +284,6 @@ class Watermarker_App(ctk.CTk):
             self.font_size = None
 
         self.watermarked_pic = self.apply_watermark(
-            self.image_path,
             self.text,
             self.font_size,
             self.font_style,
@@ -287,33 +298,62 @@ class Watermarker_App(ctk.CTk):
         self.pic_canvas.create_image(600, 395, image=tk_img, anchor='center')
         self.pic_canvas.image = tk_img
 
-        def apply_watermark(self, image_path, text, font_size, font_style,
-                            font_color, font_transparency):
-            # create another layer where watermark will be on
-            text_layer = Image.new('RGBA', self.img.size, (255, 255, 255, 0))
-            # deciding the test_layer and font details
-            draw = ImageDraw.Draw(text_layer)
 
-        if font_size is None:
-            font_size = int(min(im_w, im_h) / 10)
+
+    def apply_watermark(self, text, font_size, font_style,
+                        font_color, font_transparency):
+        base = self.img.convert('RGBA')
+        # create another layer where watermark will be on
+        text_layer = Image.new('RGBA', self.img.size, (255, 255, 255, 0))
+        # deciding the test_layer and font details
+        draw = ImageDraw.Draw(text_layer)
+
+        if font_size is None or font_size <= 0:
+            font_size = max(20, min(self.img_w, self.img_h) // 10)
         else:
-            font_size = int(min(im_w, im_h) * font_size / 100)
+            # Treat spinbox as percentage of smaller dimension
+            font_size = int(max(20, min(self.img_w, self.img_h) * font_size / 100))
+
+        preview_ratio = min(pic_frame_w / self.img_w, pic_frame_h / self.img_h)
+        font_size = max(10, int(font_size * preview_ratio))
 
         try:
-            font = ImageFont.truetype(f'{font_family}.ttf', font_size)
+            font = ImageFont.truetype(f'{font_style}.ttf', font_size)
         except:
             font = ImageFont.load_default()
+
+        # Get text size correctly
+        try:
+            # Pillow >= 8.0 has textbbox
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        except AttributeError:
+            # fallback for older Pillow
+            text_w, text_h = draw.textsize(text, font=font)
+
+        # Decide position: centre of the image
+        x = (base.width - text_w) // 2
+        y = (base.height - text_h) // 2
+
+        # Apply transparency to colour
+        r, g, b = ImageColor.getrgb(font_color)
+        draw.text((x, y), text, font=font, fill=(r, g, b, font_transparency))
+
+        # Merge layers
+        combined = Image.alpha_composite(base, text_layer)
+
+        return combined
 
     # update font according to the user input
     def update_font(self, value=None):
         """update font type and size according to the user's choice"""
-        font_type = self.font_var.get() if hasattr(self, "font_var") else "Arial"
+        self.font_type = self.font_var.get() if hasattr(self, "font_var") else "Arial"
         try:
-            font_size = int(self.font_size_var.get())
+            self.font_size = int(self.font_size_var.get())
         except (ValueError, TypeError, TclError):
-            font_size = 12 # detault
-        font_color = self.font_color_var.get() if hasattr(self, "font_color_var") else "black"
-        self.textEntry.config(font=(font_type, font_size), fg=font_color)
+            self.font_size = 12 # detault
+        self.font_color = self.font_color_var.get() if hasattr(self, "font_color_var") else "black"
+        self.textEntry.config(font=(self.font_type, self.font_size), fg=self.font_color)
 
     # update font color according to the user input
     def update_color(self):
@@ -321,7 +361,7 @@ class Watermarker_App(ctk.CTk):
         color_code = colorchooser.askcolor(title='Choose font color')
         if color_code[1]:  # hex colour
             self.font_color_var.set(color_code[1])
-            self.font_color.config(
+            self.font_color_button.configure(
                             text=color_code[1],
                             bg=color_code[1],
                             fg='black' if color_code[1].lower() != "#ffffff" else "black"
@@ -331,6 +371,7 @@ class Watermarker_App(ctk.CTk):
     def update_transparency(self, value):
         """get a user input for the transparency of text"""
         self.font_transparency_slider_var = int(float(value) * 255 / 100)
+
 
 
 
