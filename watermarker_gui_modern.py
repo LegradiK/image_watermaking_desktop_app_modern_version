@@ -352,8 +352,7 @@ class Watermarker_App(ctk.CTk):
     # update font according to the user input
     def update_font(self, value=None):
         """update font type and size according to the user's choice"""
-        font_name = self.font_var.get()
-        font_type = self.font_lookup.get(font_name)  # full path
+        font_type = 'Rosoto.ttf' # default, only for textEntry display
 
         try:
             font_size = int(self.font_size_var.get())
