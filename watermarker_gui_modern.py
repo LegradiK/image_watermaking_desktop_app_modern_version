@@ -1,8 +1,8 @@
+import os
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import *
 from tkinter import colorchooser
-import tkinter.font as tkFont
 from tkinter import messagebox
 from PIL import Image, ImageTk, ImageFont, ImageDraw, ImageColor
 import matplotlib.font_manager as fm
@@ -130,15 +130,31 @@ class Watermarker_App(ctk.CTk):
             pady=20,
             sticky='ew'
         )
-        fonts = sorted(tkFont.families())
-        # font dropdown
-        self.font_var = tk.StringVar(value="DejaVu Serif")  # default font
+        # Get the absolute path to the font folder inside your project
+        FONT_DIR = os.path.join(os.path.dirname(__file__), "font")
+
+        # List all TTF/OTF files
+        font_files = [
+            os.path.join(FONT_DIR, f)
+            for f in os.listdir(FONT_DIR)
+            if f.lower().endswith((".ttf", ".otf"))
+        ]
+
+        # Build a lookup: { "Font Name": "/full/path/to/fontfile.ttf" }
+        self.font_lookup = {}
+        for f in font_files:
+            # Get filename without extension
+            font_name = os.path.splitext(os.path.basename(f))[0]
+            self.font_lookup[font_name] = f
+
+        self.font_var = tk.StringVar(value=list(self.font_lookup.keys())[0])  # default font
         self.font_menu = ctk.CTkOptionMenu(
             self.control_panel_frame,
-            values=fonts,
+            values=list(self.font_lookup.keys()),  # show only clean names
             variable=self.font_var,
-            command=self.update_font  # called when user selects a font
+            command=self.update_font
         )
+
         self.font_menu.grid(
             row=3,
             column=1,
@@ -282,6 +298,13 @@ class Watermarker_App(ctk.CTk):
 
     def apply_watermark(self):
         """ getting all the input about how a user wants to watermark a pic"""
+        base = self.img.convert('RGBA')
+        # create another layer where watermark will be on
+        text_layer = Image.new('RGBA', self.img.size, (255, 255, 255, 0))
+        # deciding the test_layer and font details
+        draw = ImageDraw.Draw(text_layer)
+
+
         # get image_path
         if not self.image_path:
             messagebox.showwarning('No image','Please upload an image')
@@ -301,33 +324,21 @@ class Watermarker_App(ctk.CTk):
 
         font_size = int(min(self.img_w, self.img_h) * font_size_percent / 100)
 
-        font_style = self.font_var.get()
         font_color = self.font_color_var.get()
         font_transparency = self.font_transparency_slider_var
 
-        base = self.img.convert('RGBA')
-        # create another layer where watermark will be on
-        text_layer = Image.new('RGBA', self.img.size, (255, 255, 255, 0))
-        # deciding the test_layer and font details
-        draw = ImageDraw.Draw(text_layer)
+        font_name = self.font_var.get()
+        font_path = self.font_lookup.get(font_name)  # full path
 
-        font_files = fm.findSystemFonts()
-        font_lookup = {fm.FontProperties(fname=f).get_name(): f for f in font_files}
-
-        font_path = font_lookup.get(font_style)  # from your OptionMenu
-        try:
+        if font_path:
             font = ImageFont.truetype(font_path, font_size)
-        except:
-            font = ImageFont.truetype("DejaVuSans.ttf", font_size)
+        else:
+            font = ImageFont.truetype("Roboto.ttf", font_size)
 
         bbox = draw.textbbox((0, 0), text, font=font)
         text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = (base.width - text_w) // 2
         y = (base.height - text_h) // 2
-
-        # Decide position: centre of the image
-        x = base.width // 2
-        y = base.height // 2
 
         # Apply transparency to colour
         r, g, b = ImageColor.getrgb(font_color)
@@ -341,11 +352,14 @@ class Watermarker_App(ctk.CTk):
     # update font according to the user input
     def update_font(self, value=None):
         """update font type and size according to the user's choice"""
-        font_type = self.font_var.get() if hasattr(self, "font_var") else "Arial"
+        font_name = self.font_var.get()
+        font_type = self.font_lookup.get(font_name)  # full path
+
         try:
             font_size = int(self.font_size_var.get())
         except (ValueError, TypeError, TclError):
             font_size = 12 # detault
+
         font_color = self.font_color_var.get() if hasattr(self, "font_color_var") else "white"
         self.textEntry.configure(font=(font_type, font_size), text_color=font_color)
 
