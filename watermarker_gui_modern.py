@@ -180,8 +180,8 @@ class Watermarker_App(ctk.CTk):
         self.font_size_var.trace_add("write", lambda *args: self.update_font())
         self.font_size_spinbox = tk.Spinbox(
             self.control_panel_frame,
-            from_=5,
-            to=30,
+            from_=1,
+            to=20,
             width=5,
             textvariable=self.font_size_var
             )
@@ -246,18 +246,91 @@ class Watermarker_App(ctk.CTk):
             sticky='ew'
         )
 
+        self.positionLabel = ctk.CTkLabel(
+            self.control_panel_frame,
+            text='Position: '
+        )
+        self.positionLabel.grid(
+            row=7,
+            column=0,
+            padx=20,
+            pady=20,
+            sticky='ew'
+        )
+
+        # Create a dedicated frame for arrow buttons (D-pad style)
+        self.position_frame = ctk.CTkFrame(
+            self.control_panel_frame,
+            fg_color="transparent"
+        )
+        self.position_frame.grid(
+            row=7,
+            column=1,
+            columnspan=2,
+            pady=10
+        )
+        # Watermark position state
+        self.watermark_x = 100   # starting X position
+        self.watermark_y = 100   # starting Y position
+        # Up
+        self.upwards_positionButton = ctk.CTkButton(
+            self.position_frame,
+            text='⇧',
+            width=40,
+            height=40,
+            command=lambda: self.position_watermark(0, -10)
+        )
+        self.upwards_positionButton.grid(row=0, column=1, padx=5, pady=5)
+
+        # Left
+        self.leftwards_positionButton = ctk.CTkButton(
+            self.position_frame,
+            text='⇦',
+            width=40,
+            height=40,
+            command=lambda: self.position_watermark(-10, 0)
+        )
+        self.leftwards_positionButton.grid(row=1, column=0, padx=5, pady=5)
+
+        # Right
+        self.rightwards_positionButton = ctk.CTkButton(
+            self.position_frame,
+            text='⇨',
+            width=40,
+            height=40,
+            command=lambda: self.position_watermark(10, 0)
+        )
+        self.rightwards_positionButton.grid(row=1, column=2, padx=5, pady=5)
+
+        # Down
+        self.downwards_positionButton = ctk.CTkButton(
+            self.position_frame,
+            text='⇩',
+            width=40,
+            height=40,
+            command=lambda: self.position_watermark(0, 10)
+        )
+        self.downwards_positionButton.grid(row=2, column=1, padx=5, pady=5)
+
         self.apply_buttonButton = ctk.CTkButton(
             self.control_panel_frame,
             text='Apply',
             command=self.waterMarker
         )
         self.apply_buttonButton.grid(
-            row=7,
+            row=15,
             column=1,
             padx=5,
             pady=5,
             sticky='ew'
         )
+        self.watermark_id = self.pic_canvas.create_text(
+            self.watermark_x, self.watermark_y,
+            text="",
+            fill="white",
+            font=("Arial", 24, "bold"),
+            anchor="nw"   # makes positioning easier
+            )
 
     # Upload pic
     def upload_pic(self):
@@ -322,7 +395,7 @@ class Watermarker_App(ctk.CTk):
         except (ValueError, TypeError, TclError):
             font_size_percent = 10  # default %
 
-        font_size = int(min(self.img_w, self.img_h) * font_size_percent / 100)
+        font_size = int(min(self.img_w, self.img_h) * font_size_percent / 150)
 
         font_color = self.font_color_var.get()
         font_transparency = self.font_transparency_slider_var
@@ -337,8 +410,18 @@ class Watermarker_App(ctk.CTk):
 
         bbox = draw.textbbox((0, 0), text, font=font)
         text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        x = (base.width - text_w) // 2
-        y = (base.height - text_h) // 2
+
+        # Use stored position instead of always centring
+        x = self.watermark_x
+        y = self.watermark_y
+
+        # Make sure watermark stays inside image
+        if x + text_w > base.width:
+            x = base.width - text_w
+        if y + text_h > base.height:
+            y = base.height - text_h
+        if x < 0: x = 0
+        if y < 0: y = 0
 
         # Apply transparency to colour
         r, g, b = ImageColor.getrgb(font_color)
@@ -378,6 +461,13 @@ class Watermarker_App(ctk.CTk):
     def update_transparency(self, value):
         """get a user input for the transparency of text"""
         self.font_transparency_slider_var = int(float(value) * 255 / 100)
+
+    def position_watermark(self, dx=0, dy=0):
+        """Move the watermark by dx, dy pixels"""
+        self.watermark_x += dx
+        self.watermark_y += dy
+        self.pic_canvas.move(self.watermark_id, dx, dy)
+
 
 
 
