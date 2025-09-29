@@ -1,38 +1,38 @@
-#📸 Image Watermarking App
+# 📸 Image Watermarking App
 
-A simple desktop application built with Python and CustomTkinter that allows you to upload images, apply watermarks, adjust style, size, colour, transparency, and position, and then save the final result.
+### A simple desktop application built with Python and CustomTkinter that allows you to upload images, apply watermarks, adjust style, size, colour, transparency, and position, and then save the final result.
 
-##🚀 Features
+## 🚀 Features
 
-Upload any image
+- Upload any image
 
-Add custom watermark text
+- Add custom watermark text
 
-Choose font style, size, and colour
+- Choose font style, size, and colour
 
-Adjust transparency (0–100%)
+- Adjust transparency (0–100%)
 
-Move watermark using arrow buttons
+- Move watermark using arrow buttons
 
-Save the watermarked image
+- Save the watermarked image
 
-Menu bar with File, Help, and GitPage link
+- Menu bar with File, Help, and GitPage link
 
-##🖼️ Screenshots
-###Main Interface
-
-
-
-
-###File Menu
+## 🖼️ Screenshots
+### Main Interface
 
 
 
 
-###Help Menu
+### File Menu
 
 
-##⚙️ Installation
+
+
+### Help Menu
+
+
+## ⚙️ Installation
 
 Clone this repository:
 
@@ -46,21 +46,22 @@ pip install -r requirements.txt
 Run the app:
 
 python main.py
-##🖊️ Usage
 
-Go to File → Upload Image to select an image.
+## 🖊️ Usage
 
-Enter your watermark text.
+1. Go to File → Upload Image to select an image.
 
-Adjust font, size, colour, and transparency.
+2. Enter your watermark text.
 
-Use arrow buttons to move the watermark.
+3. Adjust font, size, colour, and transparency.
 
-Click Apply to preview.
+4. Use arrow buttons to move the watermark.
 
-Click Save to export the final watermarked image.
+5. Click Apply to preview.
 
-##🛠️ Technologies Used
+6. Click Save to export the final watermarked image.
+
+## 🛠️ Technologies Used
 
 Python 3.8+
 
@@ -68,9 +69,7 @@ CustomTkinter
 
 Pillow (PIL)
 
-##📦 Requirements
-
-Create a file named requirements.txt with the following content:
+## 📦 Requirements
 
 customtkinter
 Pillow
@@ -78,6 +77,6 @@ Pillow
 Install with:
 
 pip install -r requirements.txt
-##📄 License
+## 📄 License
 
 This project is licensed under the MIT License.
