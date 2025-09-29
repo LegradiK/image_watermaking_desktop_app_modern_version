@@ -19,6 +19,12 @@
 
 - Menu bar with File, Help, and GitPage link
 
+## 🎨 Credits
+
+**Fonts**: All fonts used in this project are free from [Google Fonts](https://fonts.google.com/)
+
+**Theme file**: autumn.json is from [CTkThemesPack by a13xe](https://github.com/a13xe/CTkThemesPack)
+
 ## 🖼️ Screenshots
 ### Main Interface
 <img width="1355" height="869" alt="Screenshot from 2025-09-29 11-00-48" src="https://github.com/user-attachments/assets/e53d8231-4799-440d-98bb-7db55383b522" />
@@ -33,16 +39,16 @@
 
 #### Clone this repository:  
 
-git clone https://github.com/LegradiK/image_watermaking_desktop_app_modern_version.git<br/>
-cd image_watermaking_desktop_app_modern_version<br/>
+```git clone https://github.com/LegradiK/image_watermaking_desktop_app_modern_version.git```<br/>
+```cd image_watermaking_desktop_app_modern_version```<br/>
 
 #### Install required dependencies:  
 
-pip install -r requirements.txt<br/>
+```pip install -r requirements.txt```<br/>
 
 #### Run the app:  
 
-python main.py<br/>
+```python main.py```<br/>
 
 ## 🖊️ Usage
 
@@ -60,21 +66,21 @@ python main.py<br/>
 
 ## 🛠️ Technologies Used
 
-Python 3.8+
+**Python 3.8+**<br/>
 
-CustomTkinter
+**CustomTkinter**<br/>
 
-Pillow (PIL)
+**Pillow (PIL)**<br/>
 
 ## 📦 Requirements
 
-customtkinter<br/>
-Pillow<br/>
+**customtkinter**<br/>
+**Pillow**<br/>
 
 #### Install with:
 
-pip install -r requirements.txt<br/>
+```pip install -r requirements.txt```<br/>
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**.
