@@ -260,7 +260,7 @@ class Watermarker_App(ctk.CTk):
             pady=5,
             sticky='ew'
         )
-
+        # text position
         self.positionLabel = ctk.CTkLabel(
             self.control_panel_frame,
             text='Position: '
@@ -326,7 +326,7 @@ class Watermarker_App(ctk.CTk):
             command=lambda: self.position_watermark(0, 10)
         )
         self.downwards_positionButton.grid(row=2, column=1, padx=5, pady=5)
-
+        # button to apply all the changes to the text and place it on the pic
         self.apply_buttonButton = ctk.CTkButton(
             self.control_panel_frame,
             text='Apply',
@@ -339,6 +339,7 @@ class Watermarker_App(ctk.CTk):
             pady=5,
             sticky='ew'
         )
+        # save a watermarked pic
         self.save_buttonButton = ctk.CTkButton(
             self.control_panel_frame,
             text='Save',
@@ -512,6 +513,7 @@ class Watermarker_App(ctk.CTk):
                 messagebox.showinfo("Image Saved", f"Watermarked image saved at:\n{file_path}")
 
     def show_about(self):
+        """open 'About' popup page to show the copyright"""
         about = ctk.CTkToplevel(self)
         about.title('About')
         about.geometry('400x250')
@@ -534,7 +536,7 @@ class Watermarker_App(ctk.CTk):
         close_button.pack(pady=10)
 
     def open_github(self):
-        """Open Github page in default browser"""
+        """Open Github project page in default browser"""
         webbrowser.open_new("https://github.com/LegradiK/image_watermaking_desktop_app_modern_version")
 
 if __name__ == '__main__':
