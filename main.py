@@ -523,7 +523,7 @@ class Watermarker_App(ctk.CTk):
             about,
             text='Image Watermarking App\n\n'
             'Created with Python and CustomTkinter\n'
-            'copyright 2025 Kaho L',
+            'copyright 2025 LegradiK',
             font=('Arial', 16),
             justify='center'
         )
